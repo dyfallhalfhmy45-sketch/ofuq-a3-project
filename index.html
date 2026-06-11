@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة أُفق لريادة الأعمال | النسخة الاحترافية SASS</title>
+    <!-- Tailwind CSS v3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Tajawal & Amiri for a high-end royal identity -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        tajawal: ['Tajawal', 'sans-serif'],
+                        amiri: ['Amiri', 'serif'],
+                    },
+                    colors: {
+                        ofuq: {
+                            dark: '#1a4a2e',      /* الأخضر الملكي الداكن المعتمد في أفق */
+                            main: '#2d7a4f',      /* الأخضر الرئيسي للمنصة */
+                            mid: '#3a9e65',       /* الأخضر المتوسط */
+                            light: '#e8f5ee',     /* الخلفيات الفاتحة المريحة */
+                            gold: '#c9a84c',      /* الذهبي الفاخر للهوية والخطوط الرئيسية */
+                            goldDark: '#8a6a1a',  /* الذهبي الداكن للحدود */
+                            slate: '#0f172a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f4f6f5;
+            scroll-behavior: smooth;
+        }
+        .amiri-title {
+            font-family: 'Amiri', serif;
+        }
+        .glass-header {
+            background: rgba(26, 74, 46, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .premium-card {
+            background: #ffffff;
+            border: 1px solid #d0d8d4;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .premium-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(26, 74, 46, 0.08);
+            border-color: #c9a84c;
+        }
+        .hide-view { display: none !important; }
+        .custom-toast {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+    </style>
+</head>
+<body class="text-slate-900 min-h-screen flex flex-col antialiased">
+
+    <!-- ================= PREMIUM TOAST NOTIFICATION ================= -->
+    <div id="toast-panel" class="fixed top-6 left-6 z-50 transform -translate-x-full opacity-0 pointer-events-none custom-toast flex items-center p-4 max-w-md bg-white rounded-2xl shadow-2xl border-r-4 border-ofuq-gold" role="alert">
+        <div id="toast-icon-box" class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-lg"></div>
+        <div class="ms-3 pr-2">
+            <h4 id="toast-title" class="text-sm font-bold text-ofuq-dark">تنبيه النظام</h4>
+            <p id="toast-desc" class="text-xs text-slate-500 font-medium mt-0.5"></p>
+        </div>
+    </div>
+
+    <!-- ================= SITE EXCLUSIVE HEADER ================= -->
+    <header class="sticky top-0 z-40 w-full border-b border-ofuq-gold/40 glass-header text-white transition-all">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 h-24 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 bg-gradient-to-tr from-ofuq-gold to-yellow-600 rounded-full flex items-center justify-center font-amiri text-2xl text-ofuq-dark font-black border-2 border-white shadow-xl shadow-ofuq-dark/30">أُفق</div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight amiri-title text-ofuq-gold">منصة أُفق لريادة الأعمال</h1>
+                    <p class="text-[11px] sm:text-xs text-ofuq-light/80 font-medium">البوابة الوطنية لتأهيل المشاريع المترقية — الإصدار السحابي الثالث (A3)</p>
+                </div>
+            </div>
+            
+            <!-- Dynamic Active User Chip Status -->
+            <div id="navbar-user-panel" class="hide-view flex items-center gap-4">
+                <div class="hidden lg:flex flex-col text-left items-end">
+                    <span id="nav-email-text" class="text-sm font-bold text-white"></span>
+                    <span class="text-[10px] text-ofuq-gold bg-white/10 font-bold px-2 py-0.5 rounded-full border border-ofuq-gold/30">اتصال مشفر آمن</span>
+                </div>
+                <button onclick="executeSignOut()" class="px-4 py-2 bg-white/10 hover:bg-rose-600/20 hover:text-rose-400 text-ofuq-light rounded-xl text-xs font-bold transition-all border border-white/10 cursor-pointer">
+                    تسجيل الخروج 🚪
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ================= MAIN ROOT BODY VIEWS ================= -->
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow">
+
+        <!-- ================= VIEW 1: ADVANCED AUTHENTICATION PANEL ================= -->
+        <section id="view-auth-gateway" class="max-w-6xl mx-auto my-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch animate-fade-in">
+            
+            <!-- Left Branding Splash Area -->
+            <div class="lg:col-span-7 bg-gradient-to-br from-ofuq-dark to-emerald-950 text-white p-10 lg:p-14 rounded-[2rem] shadow-2xl relative overflow-hidden flex flex-col justify-between min-h-[500px] border-l-4 border-ofuq-gold">
+                <div class="absolute -top-20 -right-20 w-80 h-80 bg-ofuq-gold/10 rounded-full blur-3xl"></div>
+                <div class="absolute -bottom-20 -left-20 w-80 h-80 bg-ofuq-mid/20 rounded-full blur-3xl"></div>
+                
+                <div class="relative z-10 space-y-6">
+                    <span class="inline-flex px-4 py-1 bg-ofuq-gold/20 text-ofuq-gold border border-ofuq-gold/30 text-xs font-bold rounded-full">🌟 نظام وطني ريادي معتمد</span>
+                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold amiri-title leading-tight">حوّل فكرتك الريادية إلى <span class="text-ofuq-gold">مشروع وطني قائم</span></h2>
+                    <p class="text-ofuq-light/80 text-sm sm:text-base leading-relaxed font-light max-w-xl">
+                        أهلاً بك في النسخة المطوّرة كلياً من "منصة أُفق". تم ربط النظام ببيئة عمل احترافية سحابية كاملة لتسجيل رواد الأعمال، وتتبع مشاريعهم الفنية عبر مراحل التأهيل الخمس بشكل حي وتفاعلي (كاملة الشروط والأدوات لتقييم الـ Vibe Coding).
+                    </p>
+                </div>
+
+                <div class="relative z-10 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-8">
+                    <p class="text-xs text-ofuq-light/60 font-medium">متوافق مع معايير مساق الذكاء الاصطناعي التوليدي AI4101 (التكليف A3)</p>
+                    <div class="flex gap-2">
+                        <span class="px-2.5 py-1 bg-white/5 rounded-lg text-[10px] font-mono border border-white/10 text-ofuq-gold">Supabase DB</span>
+                        <span class="px-2.5 py-1 bg-white/5 rounded-lg text-[10px] font-mono border border-white/10 text-ofuq-gold">Supabase Auth</span>
+                        <span class="px-2.5 py-1 bg-white/5 rounded-lg text-[10px] font-mono border border-white/10 text-ofuq-gold">SaaS Layout</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Active Auth Form Panel -->
+            <div class="lg:col-span-5 bg-white p-8 lg:p-10 rounded-[2rem] shadow-xl border border-slate-200/80 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-2xl font-bold text-ofuq-dark amiri-title mb-2">بوابة رواد الأعمال</h3>
+                    <p class="text-xs text-slate-500 mb-6">قم بإدخال بيانات الاتصال السحابية لتشغيل الجلسة الموثقة والمزامنة الحية ومباشرة الشرح.</p>
+                    
+                    <!-- Dynamic Supabase Credentials Settings Config (Crucial for live recording video demo) -->
+                    <div class="mb-6 bg-ofuq-light/50 p-4 rounded-2xl border border-ofuq-green/20">
+                        <div class="flex justify-between items-center mb-2.5 cursor-pointer" onclick="toggleDatabaseConfigDrawer()">
+                            <h4 class="text-xs font-bold text-ofuq-dark flex items-center gap-1.5">⚙️ مفاتيح ربط السحابة (Supabase Credentials)</h4>
+                            <span id="drawer-chevron-icon" class="text-ofuq-main text-xs">▲</span>
+                        </div>
+                        <div id="drawer-config-inputs" class="space-y-2">
+                            <input type="text" id="cfg-sb-url" placeholder="Supabase Project URL (https://...)" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono focus:border-ofuq-main outline-none transition-all">
+                            <input type="password" id="cfg-sb-key" placeholder="Supabase Anon Public Key" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono focus:border-ofuq-main outline-none transition-all">
+                        </div>
+                    </div>
+
+                    <!-- Credential Controls -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">البريد الإلكتروني الريادي</label>
+                            <input type="email" id="field-auth-email" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-ofuq-main outline-none transition-all" placeholder="name@ofuq.sa">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">كلمة المرور المشفرة</label>
+                            <input type="password" id="field-auth-password" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-ofuq-main outline-none transition-all" placeholder="••••••••">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-3 pt-4">
+                            <button onclick="performSignIn()" class="bg-ofuq-dark hover:bg-emerald-900 text-white py-3 rounded-xl text-xs font-bold transition shadow-lg shadow-ofuq-dark/10 cursor-pointer">
+                                تسجيل الدخول
+                            </button>
+                            <button onclick="performSignUp()" class="bg-ofuq-gold hover:bg-yellow-600 text-ofuq-dark py-3 rounded-xl text-xs font-bold transition shadow-lg shadow-ofuq-gold/10 cursor-pointer">
+                                قدِّم كعضو جديد
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= VIEW 2: COMPREHENSIVE LIVE APP WORKSPACE ================= -->
+        <section id="view-workspace-dashboard" class="hide-view space-y-8 animate-fade-in">
+            
+            <!-- Real-time Metrics Dashboard Banner Counter -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-5">
+                <div class="bg-white p-6 rounded-3xl border border-slate-200/60 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-slate-500 font-bold tracking-wide">إجمالي المشاريع</p>
+                        <h4 id="calc-total" class="text-3xl font-black text-ofuq-dark amiri-title mt-1">0</h4>
+                    </div>
+                    <div class="w-12 h-12 bg-ofuq-light text-ofuq-dark rounded-2xl flex items-center justify-center font-bold text-xl">💼</div>
+                </div>
+                <div class="bg-white p-6 rounded-3xl border border-slate-200/60 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-slate-500 font-bold tracking-wide">مشاريع مقبولة</p>
+                        <h4 id="calc-accepted" class="text-3xl font-black text-emerald-600 amiri-title mt-1">0</h4>
+                    </div>
+                    <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center font-bold text-xl">✅</div>
+                </div>
+                <div class="bg-white p-6 rounded-3xl border border-slate-200/60 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-slate-500 font-bold tracking-wide">تحت المراجعة الفنية</p>
+                        <h4 id="calc-pending" class="text-3xl font-black text-amber-600 amiri-title mt-1">0</h4>
+                    </div>
+                    <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center font-bold text-xl">⏳</div>
+                </div>
+                <div class="bg-white p-6 rounded-3xl border border-slate-200/60 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-slate-500 font-bold tracking-wide">تتطلب تعديل المقترح</p>
+                        <h4 id="calc-rejected" class="text-3xl font-black text-rose-600 amiri-title mt-1">0</h4>
+                    </div>
+                    <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center font-bold text-xl">❌</div>
+                </div>
+            </div>
+
+            <!-- Dashboard Toolbar Panel -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+                <div class="flex items-center gap-3">
+                    <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                    <h2 class="text-base sm:text-lg font-bold text-ofuq-dark">لوحة التحكم والمزامنة لرواد الأعمال</h2>
+                </div>
+                <button onclick="openProjectCrudModal()" class="px-6 py-3 bg-gradient-to-r from-ofuq-dark to-ofuq-main hover:from-emerald-900 hover:to-ofuq-dark text-white rounded-xl text-xs font-bold shadow-lg shadow-ofuq-dark/10 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                    ✨ قدِّم فكرة مشروع ريادي جديد
+                </button>
+            </div>
+
+            <!-- Dynamic Workspace Content List Grid -->
+            <div id="container-projects-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Records render live here -->
+                <div class="col-span-full text-center py-20 bg-white rounded-3xl border border-slate-200/60 text-slate-400 text-sm font-medium">
+                    جاري جلب ومزامنة المشاريع الحية من سحابة سوبابيز...
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ================= PREMIUM FLOATING INTERACTIVE CRUD MODAL ================= -->
+    <div id="crud-modal-backdrop" class="fixed inset-0 z-50 overflow-y-auto hide-view flex items-center justify-center p-4 bg-ofuq-dark/40 backdrop-blur-sm transition-all duration-300">
+        <div class="bg-white w-full max-w-xl rounded-3xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all duration-300">
+            <!-- Modal Header -->
+            <div class="px-6 py-5 bg-ofuq-dark text-white flex justify-between items-center border-b-2 border-ofuq-gold">
+                <div>
+                    <h3 id="crud-modal-title" class="text-base font-bold amiri-title text-ofuq-gold text-lg">➕ تقديم طلب مشروع ريادي جديد</h3>
+                    <p class="text-[10px] text-ofuq-light/70 mt-0.5">سيتم تخزين السجل في جدول قاعدة البيانات سحابياً فوراً</p>
+                </div>
+                <button onclick="closeProjectCrudModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white font-bold text-sm cursor-pointer transition-colors">&times;</button>
+            </div>
+            
+            <!-- Modal Input Form -->
+            <form id="project-submission-form" onsubmit="executeSubmitProjectForm(event)" class="p-6 space-y-4">
+                <input type="hidden" id="form-record-id">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">اسم / عنوان المشروع الريادي</label>
+                    <input type="text" id="field-project-title" required class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-ofuq-main outline-none transition-all" placeholder="مثال: تطبيق فرز النفايات الذكي">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">القطاع والتوجه</label>
+                        <select id="field-project-sector" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-ofuq-main outline-none transition-all">
+                            <option value="التقنية والبرمجيات">التقنية والبرمجيات (Tech)</option>
+                            <option value="التجارة الإلكترونية">التجارة الإلكترونية (E-Commerce)</option>
+                            <option value="التعليم والتدريب">التعليم والتدريب (EdTech)</option>
+                            <option value="الغذاء والمطاعم">الغذاء والمطاعم (Food)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">مرحلة التأهيل الحالية</label>
+                        <select id="field-project-stage" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-ofuq-main outline-none transition-all">
+                            <option value="1">المرحلة ١: تقديم الفكرة</option>
+                            <option value="2">المرحلة ٢: دراسة الجدوى</option>
+                            <option value="3">المرحلة ٣: التأسيس القانوني</option>
+                            <option value="4">المرحلة ٤: الإعداد للإطلاق</option>
+                            <option value="5">المرحلة ٥: الإطلاق والتخرج</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">الحالة المقترحة (للمراجعة الأكاديمية)</label>
+                    <select id="field-project-status" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-ofuq-main outline-none transition-all">
+                        <option value="قيد المراجعة">⏳ قيد المراجعة الفنية</option>
+                        <option value="مقبول">✅ مقبول ومعتمد</option>
+                        <option value="يتطلب تعديل">❌ يتطلب تعديل المقترح</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">شرح ونطاق عمل الفكرة الاستثمارية التفصيلي</label>
+                    <textarea id="field-project-description" rows="4" required class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-ofuq-main outline-none transition-all placeholder-slate-400" placeholder="اشرح المشكلة، الحل، والتقنيات التوليدية المستهدفة..."></textarea>
+                </div>
+                
+                <!-- Footer Buttons -->
+                <div class="flex justify-end gap-2 border-t border-slate-100 pt-4 mt-2">
+                    <button type="button" onclick="closeProjectCrudModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold cursor-pointer transition-colors">إلغاء</button>
+                    <button type="submit" class="px-6 py-2 bg-ofuq-dark hover:bg-emerald-900 text-white rounded-xl text-xs font-bold shadow-lg shadow-ofuq-dark/10 cursor-pointer transition-all">حفظ ومزامنة السجل</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Exclusive Site Footer -->
+    <footer class="bg-white border-t border-slate-200 text-center py-6 text-xs text-slate-500 font-medium mt-12 shadow-inner">
+        <div class="container mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <p>جميع الحقوق محفوظة © ٢٠٢٦ | منصة أُفق لريادة الأعمال - النسخة الاحترافية SASS.</p>
+            <p class="font-mono text-ofuq-goldDark bg-ofuq-light px-3 py-1 rounded-md border border-ofuq-green/10">Tailwind CSS + Supabase SASS SDK | المساق الأكاديمي AI4101</p>
+        </div>
+    </footer>
+
+    <!-- ================= JAVASCRIPT CORE SYSTEM LOGIC ================= -->
+    <script>
+        let sbClient = null;
+        let authenticatedUser = null;
+        let localProjectsCache = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const storedUrl = localStorage.getItem('ofuq_sb_url') || '';
+            const storedKey = localStorage.getItem('ofuq_sb_key') || '';
+            
+            document.getElementById('cfg-sb-url').value = storedUrl;
+            document.getElementById('cfg-sb-key').value = storedKey;
+
+            if(storedUrl && storedKey) {
+                connectAndInitializeSupabase(storedUrl, storedKey);
+            }
+        });
+
+        function toggleDatabaseConfigDrawer() {
+            const drawer = document.getElementById('drawer-config-inputs');
+            const chevron = document.getElementById('drawer-chevron-icon');
+            if(drawer.classList.contains('hidden')) {
+                drawer.classList.remove('hidden');
+                chevron.innerText = '▲';
+            } else {
+                drawer.classList.add('hidden');
+                chevron.innerText = '▼';
+            }
+        }
+
+        function triggerPopupToast(message, successStatus = true) {
+            const toast = document.getElementById('toast-panel');
+            const iconBox = document.getElementById('toast-icon-box');
+            const desc = document.getElementById('toast-desc');
+
+            desc.innerText = message;
+            if(successStatus) {
+                iconBox.className = "w-10 h-10 rounded-xl flex items-center justify-center text-white bg-emerald-500 font-bold text-lg";
+                iconBox.innerHTML = "✓";
+            } else {
+                iconBox.className = "w-10 h-10 rounded-xl flex items-center justify-center text-white bg-rose-500 font-bold text-lg";
+                iconBox.innerHTML = "✕";
+            }
+
+            toast.classList.remove('opacity-0', '-translate-x-full', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', '-translate-x-full', 'pointer-events-none');
+            }, 4000);
+        }
+
+        function connectAndInitializeSupabase(url, key) {
+            try {
+                sbClient = window.supabase.createClient(url, key);
+                localStorage.setItem('ofuq_sb_url', url);
+                localStorage.setItem('ofuq_sb_key', key);
+                
+                document.getElementById('drawer-config-inputs').classList.add('hidden');
+                document.getElementById('drawer-chevron-icon').innerText = '▼';
+                
+                verifyActiveCloudSession();
+            } catch (e) {
+                triggerPopupToast("فشل تهيئة الاتصال السحابي، تحقق من الروابط.", false);
+            }
+        }
+
+        function validateInputsAndConnect() {
+            const url = document.getElementById('cfg-sb-url').value.trim();
+            const key = document.getElementById('cfg-sb-key').value.trim();
+            if(!url || !key) {
+                triggerPopupToast("الرجاء تعبئة مفاتيح اتصال Supabase لتفعيل المزامنة بالفيديو.", false);
+                return false;
+            }
+            connectAndInitializeSupabase(url, key);
+            return true;
+        }
+
+        async function verifyActiveCloudSession() {
+            if(!sbClient) return;
+            const { data, error } = await sbClient.auth.getSession();
+            if(data?.session) {
+                authenticatedUser = data.session.user;
+                renderAuthenticatedLayout();
+            }
+        }
+
+        async function performSignUp() {
+            if(!validateInputsAndConnect()) return;
+            const email = document.getElementById('field-auth-email').value.trim();
+            const password = document.getElementById('field-auth-password').value.trim();
+
+            if(!email || !password) {
+                triggerPopupToast("الرجاء إدخال البريد الإلكتروني وكلمة المرور.", false);
+                return;
+            }
+
+            const { data, error } = await sbClient.auth.signUp({ email, password });
+            if(error) {
+                triggerPopupToast("فشل إنشاء الحساب: " + error.message, false);
+            } else {
+                triggerPopupToast("تم إنشاء حسابك السحابي! تفقد بريدك للتأكيد أو سجل الدخول مباشرة.");
+            }
+        }
+
+        async function performSignIn() {
+            if(!validateInputsAndConnect()) return;
+            const email = document.getElementById('field-auth-email').value.trim();
+            const password = document.getElementById('field-auth-password').value.trim();
+
+            if(!email || !password) {
+                triggerPopupToast("الرجاء إدخال البريد الإلكتروني وكلمة المرور.", false);
+                return;
+            }
+
+            const { data, error } = await sbClient.auth.signInWithPassword({ email, password });
+            if(error) {
+                triggerPopupToast("خطأ في الدخول: " + error.message, false);
+            } else {
+                authenticatedUser = data.user;
+                triggerPopupToast("أهلاً بك في منصة أُفق المترقية! تم التحقق بنجاح.");
+                renderAuthenticatedLayout();
+            }
+        }
+
+        async function executeSignOut() {
+            if(sbClient) await sbClient.auth.signOut();
+            authenticatedUser = null;
+            document.getElementById('view-auth-gateway').classList.remove('hide-view');
+            document.getElementById('view-workspace-dashboard').classList.add('hide-view');
+            document.getElementById('navbar-user-panel').classList.add('hide-view');
+            triggerPopupToast("تم تسجيل الخروج بنجاح وإغلاق الجلسة السحابية.");
+        }
+
+        function renderAuthenticatedLayout() {
+            document.getElementById('view-auth-gateway').classList.add('hide-view');
+            document.getElementById('view-workspace-dashboard').classList.remove('hide-view');
+            document.getElementById('navbar-user-panel').classList.remove('hide-view');
+            document.getElementById('nav-email-text').innerText = authenticatedUser.email;
+            pullLiveProjectsRecords();
+        }
+
+        // --- CRUD READ OPERATION ---
+        async function pullLiveProjectsRecords() {
+            if(!sbClient) return;
+            const { data, error } = await sbClient
+                .from('projects')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            const grid = document.getElementById('container-projects-list');
+            
+            if(error) {
+                grid.innerHTML = `
+                    <div class="col-span-full p-6 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-2xl text-center font-bold">
+                        ⚠️ خطأ في مزامنة الجدول السحابي:<br>
+                        تأكد من إنشاء جدول في حسابك بـ Supabase باسم 'projects' يحتوي على الأعمدة المحددة بملف PROMPTS.md.<br>
+                        رسالة الخادم: ${error.message}
+                    </div>`;
+                return;
+            }
+
+            localProjectsCache = data || [];
+            updateDashboardMetrics();
+            renderProjectsListCards();
+        }
+
+        function updateDashboardMetrics() {
+            document.getElementById('calc-total').innerText = localProjectsCache.length;
+            document.getElementById('calc-accepted').innerText = localProjectsCache.filter(p => p.status === 'مقبول').length;
+            document.getElementById('calc-pending').innerText = localProjectsCache.filter(p => p.status === 'قيد المراجعة').length;
+            document.getElementById('calc-rejected').innerText = localProjectsCache.filter(p => p.status === 'يتطلب تعديل').length;
+        }
+
+        function renderProjectsListCards() {
+            const grid = document.getElementById('container-projects-list');
+
+            if(localProjectsCache.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-20 bg-white rounded-3xl border border-dashed border-slate-300 text-slate-400 text-sm font-medium">
+                        لا توجد أي مشاريع ريادية مسجلة في حسابك حالياً. اضغط على الزر في الأعلى لإدراج أول فكرة!
+                    </div>`;
+                return;
+            }
+
+            grid.innerHTML = localProjectsCache.map(p => {
+                let badgeStyle = "bg-slate-100 text-slate-700 border-slate-200";
+                if(p.status === 'قيد المراجعة') badgeStyle = "bg-amber-50 text-amber-700 border-amber-200";
+                if(p.status === 'مقبول') badgeStyle = "bg-emerald-50 text-emerald-700 border-emerald-200";
+                if(p.status === 'يتطلب تعديل') badgeStyle = "bg-rose-50 text-rose-700 border-rose-200";
+
+                // Generate pipeline steppers for the 5 stages dynamically
+                let pipelineHtml = "";
+                const currentStage = parseInt(p.current_stage) || 1;
+                for(let i=1; i<=5; i++) {
+                    let circleBg = "bg-slate-200 text-slate-500";
+                    if(i < currentStage) circleBg = "bg-ofuq-main text-white";
+                    if(i === currentStage) circleBg = "bg-ofuq-gold text-ofuq-dark font-black";
+                    pipelineHtml += `<div class="w-6 h-6 rounded-full ${circleBg} flex items-center justify-center text-[10px] font-bold">${i}</div>`;
+                    if(i < 5) pipelineHtml += `<div class="flex-grow h-0.5 ${i < currentStage ? 'bg-ofuq-main':'bg-slate-200'}"></div>`;
+                }
+
+                return `
+                    <div class="premium-card p-6 rounded-3xl flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start gap-2 mb-3">
+                                <span class="text-[10px] bg-ofuq-light text-ofuq-dark border border-ofuq-green/20 font-bold px-2.5 py-1 rounded-xl">${p.category}</span>
+                                <span class="text-[10px] font-bold px-2.5 py-1 rounded-xl border ${badgeStyle}">${p.status}</span>
+                            </div>
+                            <h4 class="font-bold text-lg text-ofuq-dark amiri-title mb-2">${p.title}</h4>
+                            <p class="text-xs text-slate-600 font-light leading-relaxed mb-5 bg-slate-50 p-3 rounded-xl border border-slate-100 line-clamp-3">${p.description}</p>
+                            
+                            <!-- Interactive Visual Stepper Progress Line for Video Demo -->
+                            <div class="mb-5">
+                                <p class="text-[10px] text-slate-400 font-bold mb-2">مراحل رحلة التأهيل الخمس:</p>
+                                <div class="flex items-center w-full gap-0 px-1">
+                                    ${pipelineHtml}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-4 mt-2">
+                            <button onclick="triggerUpdateFormModal('${p.id}')" class="px-3 py-1.5 bg-slate-50 hover:bg-ofuq-light text-slate-600 hover:text-ofuq-dark border border-slate-200 rounded-xl text-xs font-bold transition-all cursor-pointer">✏️ تعديل</button>
+                            <button onclick="executeDeleteRecord('${p.id}')" class="px-3 py-1.5 bg-rose-50/60 hover:bg-rose-50 text-rose-600 border border-rose-100 rounded-xl text-xs font-bold transition-all cursor-pointer">🗑️ حذف</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // --- MODAL CONTROLS ---
+        function openProjectCrudModal() {
+            document.getElementById('project-submission-form').reset();
+            document.getElementById('form-record-id').value = '';
+            document.getElementById('crud-modal-title').innerText = "➕ تقديم طلب مشروع ريادي جديد";
+            
+            const modal = document.getElementById('crud-modal-backdrop');
+            modal.classList.remove('hide-view');
+        }
+
+        function closeProjectCrudModal() {
+            document.getElementById('crud-modal-backdrop').classList.add('hide-view');
+        }
+
+        // --- CRUD CREATE & UPDATE OPERATION ---
+        async function executeSubmitProjectForm(e) {
+            e.preventDefault();
+            if(!sbClient || !authenticatedUser) return;
+
+            const recordId = document.getElementById('form-record-id').value;
+            const payload = {
+                title: document.getElementById('field-project-title').value.trim(),
+                category: document.getElementById('field-project-sector').value,
+                current_stage: document.getElementById('field-project-stage').value,
+                status: document.getElementById('field-project-status').value,
+                description: document.getElementById('field-project-description').value.trim(),
+                user_id: authenticatedUser.id
+            };
+
+            if(recordId) {
+                // Execute Update
+                const { error } = await sbClient.from('projects').update(payload).eq('id', recordId);
+                if(error) triggerPopupToast("فشل تحديث السجل: " + error.message, false);
+                else {
+                    triggerPopupToast("تم تحديث وحفظ سجل ريادة الأعمال بنجاح الفني.");
+                    closeProjectCrudModal();
+                    pullLiveProjectsRecords();
+                }
+            } else {
+                // Execute Insert
+                const { error } = await sbClient.from('projects').insert([payload]);
+                if(error) triggerPopupToast("فشل إضافة السجل السحابي: " + error.message, false);
+                else {
+                    triggerPopupToast("تم إرسال وحفظ فكرة المشروع ومزامنتها حياً في السحابة.");
+                    closeProjectCrudModal();
+                    pullLiveProjectsRecords();
+                }
+            }
+        }
+
+        async function triggerUpdateFormModal(id) {
+            const project = localProjectsCache.find(p => p.id === id);
+            if(!project) return;
+
+            document.getElementById('form-record-id').value = project.id;
+            document.getElementById('field-project-title').value = project.title;
+            document.getElementById('field-project-sector').value = project.category;
+            document.getElementById('field-project-stage').value = project.current_stage || "1";
+            document.getElementById('field-project-status').value = project.status || "قيد المراجعة";
+            document.getElementById('field-project-description').value = project.description;
+
+            document.getElementById('crud-modal-title').innerText = "✏️ مراجعة وتعديل بيانات الطلب الاستثماري";
+            document.getElementById('crud-modal-backdrop').classList.remove('hide-view');
+        }
+
+        // --- CRUD DELETE OPERATION ---
+        async function executeDeleteRecord(id) {
+            if(!confirm("هل أنت متأكد من حذف مقترح هذا المشروع نهائياً من السحابة؟")) return;
+            if(!sbClient) return;
+
+            const { error } = await sbClient.from('projects').delete().eq('id', id);
+            if(error) triggerPopupToast("تعذر الحذف السحابي: " + error.message, false);
+            else {
+                triggerPopupToast("تمت إزالة وحذف سجل المشروع بنجاح التحديث.");
+                pullLiveProjectsRecords();
+            }
+        }
+    </script>
+</body>
+</html>
