@@ -1,4 +1,4 @@
-طريق التشغيل مفاتيح السحابة الخانة الاولى  https://tjgneszzdcdzcjhtnwti.supabase.co 
+طريق التشغيل مفاتيح السحابة الخانة الاولى https://tjgneszzdcdzcjhtnwti.supabase.co 
 الخانة الثانية  sb_publishable_N1ULG4H5a2mXwfyY7v_QbQ_L9vtlS5I
 
 النسخة العربية (ARABIC VERSION)
