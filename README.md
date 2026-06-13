@@ -1,4 +1,6 @@
-‏طريقة استخدام الموقع(https://youtu.be/OzUnw8wEFw8?si=vCyTCGxmlhJOtUHu)
+‏طريقة استخدام
+(https://ofuq-a3-project.vercel.app/) الموقع
+الموقع(https://youtu.be/OzUnw8wEFw8?si=vCyTCGxmlhJOtUHu)
 
 طريق التشغيل مفاتيح السحابة الخانة الاولى https://tjgneszzdcdzcjhtnwti.supabase.co 
 الخانة الثانية  sb_publishable_N1ULG4H5a2mXwfyY7v_QbQ_L9vtlS5I
